@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"charset": "utf8",
+		"forceConsistentCasingInFileNames": true,
+		"isolatedModules": true,
+		"lib": [
+			"esnext"
+		],
+		"module": "esnext",
+		"moduleResolution": "node",
+		"noEmit": true,
+		"removeComments": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "esnext",
+		"types": [
+			"node"
+		]
+	},
+	"include": [
+		"./src/**/*.ts"
+	]
+}
