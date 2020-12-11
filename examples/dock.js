@@ -1,4 +1,4 @@
-import { ConsoleDockTransport, colorFormatter, MasterLogger } from '../build/index.mjs';
+const { ConsoleDockTransport, colorFormatter, MasterLogger } = require('../build');
 
 const dock = new ConsoleDockTransport({
 	formatter: colorFormatter

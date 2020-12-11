@@ -1,4 +1,4 @@
-import { ANSI16, ANSI16M, ANSI256 } from '../build/index.mjs';
+const { ANSI16, ANSI16M, ANSI256 } = require('../build');
 
 function testSystem(color, step = 255 / 11) {
 	let str = '';

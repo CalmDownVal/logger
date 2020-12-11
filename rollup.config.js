@@ -8,7 +8,7 @@ export default {
 			format: 'esm'
 		},
 		{
-			file: './build/index.cjs',
+			file: './build/index.js',
 			format: 'cjs'
 		}
 	],
