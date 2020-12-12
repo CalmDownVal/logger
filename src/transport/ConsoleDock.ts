@@ -120,7 +120,7 @@ export class ConsoleDockTransport extends ConsoleTransport {
 			}
 		}
 
-		cmd += cursorMove(this.cursorOffset, list.length);
+		cmd += cursorMove(this.cursorOffset, list.length) + clearDown;
 		super.write(cmd);
 
 		this.cursorOffset =
