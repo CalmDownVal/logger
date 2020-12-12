@@ -17,7 +17,7 @@ export class ProxyLogger implements Logger {
 	public log(level: LogLevel, ...args: any) {
 		let str = '';
 		for (let i = 0; i < args.length; ++i) {
-			str += args[i] + ' ';
+			str += (str ? ' ' : '') + args[i];
 		}
 		this.callback(str + '\n', level, this.tags);
 	}
