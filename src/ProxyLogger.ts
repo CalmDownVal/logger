@@ -14,23 +14,27 @@ export class ProxyLogger implements Logger {
 		return new ProxyLogger(this.callback, this.tags.concat(tag));
 	}
 
-	public log(message: string, level: LogLevel) {
-		this.callback(message + '\n', level, this.tags);
+	public log(level: LogLevel, ...args: any) {
+		let str = '';
+		for (let i = 0; i < args.length; ++i) {
+			str += args[i] + ' ';
+		}
+		this.callback(str + '\n', level, this.tags);
 	}
 
-	public debug(message: string) {
-		this.log(message, LogLevel.Debug);
+	public debug(...args: any) {
+		this.log(LogLevel.Debug, ...args);
 	}
 
-	public info(message: string) {
-		this.log(message, LogLevel.Info);
+	public info(...args: any) {
+		this.log(LogLevel.Info, ...args);
 	}
 
-	public warn(message: string) {
-		this.log(message, LogLevel.Warning);
+	public warn(...args: any) {
+		this.log(LogLevel.Warning, ...args);
 	}
 
-	public error(message: string) {
-		this.log(message, LogLevel.Error);
+	public error(...args: any) {
+		this.log(LogLevel.Error, ...args);
 	}
 }
