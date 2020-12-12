@@ -32,6 +32,12 @@ function createSystem(background: (color: number) => string, foreground: (color:
 	return Object.freeze({
 		bg: background,
 		fg: foreground,
+		bold: '\u001b[1m',
+		lowIntensity: '\u001b[2m',
+		underline: '\u001b[4m',
+		blinking: '\u001b[5m',
+		inverse: '\u001b[7m',
+		invisible: '\u001b[8m',
 		reset: '\u001b[0m',
 		resetBg: '\u001b[49m',
 		resetFg: '\u001b[39m'

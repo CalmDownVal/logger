@@ -1,6 +1,6 @@
 {
 	"name": "@calmdownval/master-logger",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"license": "ISC",
 	"type": "commonjs",
 	"main": "./build/index.js",
