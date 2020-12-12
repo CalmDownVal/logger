@@ -1,6 +1,6 @@
 {
 	"name": "@calmdownval/master-logger",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"license": "ISC",
 	"type": "commonjs",
 	"main": "./build/index.js",
@@ -11,6 +11,10 @@
 			"require": "./build/index.js",
 			"default": "./build/index.mjs"
 		}
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/CalmDownVal/master-logger.git"
 	},
 	"devDependencies": {
 		"@rollup/plugin-typescript": "4.x.x",
