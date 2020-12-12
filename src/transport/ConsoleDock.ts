@@ -1,8 +1,5 @@
 import { ConsoleTransport } from './Console';
 
-const clearLine = '\u001b[2K';
-const clearDown = '\u001b[0J';
-
 function cursorMove(from: number, to: number) {
 	const dist = Math.abs(from - to);
 	return dist > 0 ? `\u001b[${dist}${from > to ? 'A' : 'B'}` : '';
@@ -22,7 +19,7 @@ interface ConsoleDockRowInternal extends ConsoleDockRow {
 }
 
 export class ConsoleDockTransport extends ConsoleTransport {
-	private readonly _rows: ConsoleDockRowInternal[] = [];
+	private _rows: ConsoleDockRowInternal[] = [];
 	private cursorOffset = 0;
 	private dirtyIndex = 0;
 	private isPendingUpdate = false;
@@ -30,6 +27,14 @@ export class ConsoleDockTransport extends ConsoleTransport {
 
 	public get rows(): readonly ConsoleDockRow[] {
 		return this._rows;
+	}
+
+	public clear() {
+		if (this._rows.length !== 0) {
+			this._rows = [];
+			this.dirtyIndex = 0;
+			this.scheduleUpdate();
+		}
 	}
 
 	public createRow(insertIndex?: number): ConsoleDockRow {
@@ -103,10 +108,11 @@ export class ConsoleDockTransport extends ConsoleTransport {
 
 	private readonly flush = () => {
 		let cmd = '';
+		let clearDown = '\u001b[0J';
+		let clearLine = '\u001b[2K';
 		if (this.lineBuffer.length !== 0) {
-			cmd += cursorMove(this.cursorOffset, 0) + clearDown +this.lineBuffer;
-
-			this.lineBuffer = '';
+			cmd += cursorMove(this.cursorOffset, 0) + '\r' + clearDown + this.lineBuffer;
+			this.lineBuffer = clearDown = clearLine = '';
 			this.cursorOffset = 0;
 		}
 
@@ -114,7 +120,7 @@ export class ConsoleDockTransport extends ConsoleTransport {
 		for (let i = 0; i < list.length; ++i) {
 			const row = list[i];
 			if (row.isDirty || i >= this.dirtyIndex) {
-				cmd += cursorMove(this.cursorOffset, i) + clearLine + row.content + '\n';
+				cmd += cursorMove(this.cursorOffset, i) + '\r' + clearLine + row.content + '\n';
 				this.cursorOffset = i + 1;
 				row.isDirty = false;
 			}
@@ -122,9 +128,7 @@ export class ConsoleDockTransport extends ConsoleTransport {
 
 		cmd += cursorMove(this.cursorOffset, list.length) + clearDown;
 		super.write(cmd);
-
-		this.cursorOffset =
-		this.dirtyIndex = list.length;
+		this.cursorOffset = this.dirtyIndex = list.length;
 		this.isPendingUpdate = false;
 	};
 }
