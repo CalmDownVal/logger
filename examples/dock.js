@@ -13,14 +13,17 @@ logger.info('ipsum');
 logger.warn('dolor');
 logger.error('sit amet');
 
-dock.addRows(3);
+dock.createRow();
+dock.createRow();
+dock.createRow();
+
 setInterval(() => {
-	for (let i = 0; i < 3; ++i) {
-		dock.setRow(i, '' + Math.random());
+	for (let i = 0; i < dock.rows.length; ++i) {
+		dock.rows[i].content = Math.random();
 	}
 }, 500);
 
 let counter = 0;
 setInterval(() => {
-	logger.info('' + (++counter));
+	logger.info(++counter);
 }, 1000);

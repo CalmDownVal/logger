@@ -8,125 +8,123 @@ function cursorMove(from: number, to: number) {
 	return dist > 0 ? `\u001b[${dist}${from > to ? 'A' : 'B'}` : '';
 }
 
-function sanitizeLF(content: string) {
-	return content.replace(/[\r\n]+/g, ' ');
+function sanitizeContent(content: any) {
+	return ('' + content).replace(/[\r\n]+/g, ' ');
 }
 
-interface DockRow {
-	content: string;
+export interface ConsoleDockRow {
+	content: any;
+	delete(): boolean;
+}
+
+interface ConsoleDockRowInternal extends ConsoleDockRow {
 	isDirty: boolean;
-	isWritten: boolean;
 }
 
 export class ConsoleDockTransport extends ConsoleTransport {
-	private readonly dockRows: DockRow[] = [];
+	private readonly _rows: ConsoleDockRowInternal[] = [];
 	private cursorOffset = 0;
+	private dirtyIndex = 0;
 	private isPendingUpdate = false;
 	private lineBuffer = '';
 
-	public get dockSize() {
-		return this.dockRows.length;
+	public get rows(): readonly ConsoleDockRow[] {
+		return this._rows;
 	}
 
-	public addRows(count: number) {
-		for (let i = 0; i < count; ++i) {
-			this.dockRows.push(this.createRow());
+	public createRow(insertIndex?: number): ConsoleDockRow {
+		let content = '';
+
+		const dock = this;
+		const row: ConsoleDockRowInternal = {
+			isDirty: true,
+			get content() {
+				return content;
+			},
+			set content(value: any) {
+				if (content !== (content = sanitizeContent(value))) {
+					this.isDirty = true;
+					dock.scheduleUpdate();
+				}
+			},
+			delete() {
+				return dock.deleteRow(this);
+			}
+		};
+
+		if (insertIndex === undefined) {
+			this._rows.push(row);
+		}
+		else {
+			if (insertIndex < 0 || insertIndex > this._rows.length) {
+				throw new RangeError('provided row index is out of bounds');
+			}
+			this._rows.splice(insertIndex, 0, row);
+			this.dirtyIndex = Math.min(this.dirtyIndex, insertIndex);
 		}
 
 		this.scheduleUpdate();
+		return row;
 	}
 
-	public removeRows(count: number) {
-		if (count > this.dockRows.length) {
-			throw new RangeError('requested removal of more rows than currently present');
+	public deleteRow(row: ConsoleDockRow) {
+		const list = this._rows;
+
+		let index = 0;
+		while (index < list.length) {
+			if (list[index] === row) {
+				list.splice(index, 1);
+				break;
+			}
+			++index;
 		}
 
-		this.dockRows.splice(this.dockRows.length - count, count);
-		this.scheduleUpdate();
-	}
-
-	public insertRowAt(index: number) {
-		if (index === this.dockRows.length) {
-			this.addRows(1);
-			return;
+		if (index === list.length) {
+			return false;
 		}
 
-		this.assertRowIndex(index);
-		this.dockRows.splice(index, 0, this.createRow());
+		this.dirtyIndex = Math.min(this.dirtyIndex, index);
 		this.scheduleUpdate();
-	}
-
-	public removeRowAt(index: number) {
-		this.assertRowIndex(index);
-		this.dockRows.splice(index, 1);
-		this.scheduleUpdate();
-	}
-
-	public setRow(index: number, content: string) {
-		this.assertRowIndex(index);
-
-		const row = this.dockRows[index];
-		row.content = sanitizeLF(content);
-		row.isDirty = true;
-		this.scheduleUpdate();
+		return true;
 	}
 
 	public write(str: string) {
 		this.lineBuffer += str;
+		this.dirtyIndex = 0;
 		this.scheduleUpdate();
 	}
 
-	private assertRowIndex(index: number) {
-		if (index < 0 || index >= this.dockRows.length) {
-			throw new RangeError('provided row index is out of bounds');
-		}
-	}
-
-	private createRow() {
-		return {
-			content: '',
-			isDirty: true,
-			isWritten: false,
-		};
-	}
-
-	private scheduleUpdate() {
+	private readonly scheduleUpdate = () => {
 		if (!this.isPendingUpdate) {
 			this.isPendingUpdate = true;
 			process.nextTick(this.flush);
 		}
-	}
+	};
 
 	private readonly flush = () => {
 		let cmd = '';
-		let forceUpdate = false;
-
 		if (this.lineBuffer.length !== 0) {
 			cmd += cursorMove(this.cursorOffset, 0) + clearDown +this.lineBuffer;
 
 			this.lineBuffer = '';
 			this.cursorOffset = 0;
-			forceUpdate = true;
 		}
 
-		const length = this.dockRows.length;
-		for (let i = 0; i < length; ++i) {
-			const row = this.dockRows[i];
-			if (forceUpdate || row.isDirty) {
+		const list = this._rows;
+		for (let i = 0; i < list.length; ++i) {
+			const row = list[i];
+			if (row.isDirty || i >= this.dirtyIndex) {
 				cmd += cursorMove(this.cursorOffset, i) + clearLine + row.content + '\n';
 				this.cursorOffset = i + 1;
-
-				if (!row.isWritten) {
-					row.isWritten = true;
-					forceUpdate = true;
-				}
+				row.isDirty = false;
 			}
 		}
 
-		cmd += cursorMove(this.cursorOffset, length);
+		cmd += cursorMove(this.cursorOffset, list.length);
 		super.write(cmd);
 
-		this.cursorOffset = length;
+		this.cursorOffset =
+		this.dirtyIndex = list.length;
 		this.isPendingUpdate = false;
 	};
 }
