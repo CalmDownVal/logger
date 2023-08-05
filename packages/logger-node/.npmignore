@@ -1,3 +1,4 @@
 src
+.eslintrc
 rollup.config.mjs
 tsconfig.json
