@@ -1,0 +1,28 @@
+{
+	"compilerOptions": {
+		"baseUrl": "./src",
+		"isolatedModules": true,
+		"lib": [
+			"ESNext"
+		],
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"newLine": "lf",
+		"noEmit": true,
+		"paths": {
+			"~/*": [
+				"*"
+			]
+		},
+		"skipLibCheck": true,
+		"stripInternal": true,
+		"strict": true,
+		"target": "ESNext",
+		"types": [
+			"node"
+		]
+	},
+	"include": [
+		"./src/**/*"
+	]
+}

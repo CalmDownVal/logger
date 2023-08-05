@@ -1,0 +1,16 @@
+# Yarn
+.yarn
+.pnp.cjs
+.pnp.loader.mjs
+.yarnrc.yml
+yarn.lock
+
+# MacOS Finder files
+.DS_Store
+
+# Misc
+.vscode
+.editorconfig
+examples
+rollup.config.mjs
+tsconfig.json

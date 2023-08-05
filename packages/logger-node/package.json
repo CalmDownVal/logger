@@ -1,0 +1,30 @@
+{
+	"name": "@cdv/logger-node",
+	"version": "1.0.0",
+	"license": "ISC",
+	"exports": {
+		".": {
+			"require": "./build/index.min.cjs",
+			"default": "./build/index.min.mjs",
+			"types": "./build/index.d.ts"
+		}
+	},
+	"peerDependencies": {
+		"@cdv/logger": ">=1.0.0"
+	},
+	"devDependencies": {
+		"@cdv/logger": "1.0.0",
+		"@rollup/plugin-terser": "0.4.3",
+		"@rollup/plugin-typescript": "11.1.2",
+		"@types/node": "20.4.8",
+		"rollup": "3.27.2",
+		"rollup-plugin-delete": "2.0.0",
+		"rollup-plugin-dts": "5.3.1",
+		"rollup-plugin-node-externals": "6.1.1",
+		"tslib": "2.6.1",
+		"typescript": "5.1.6"
+	},
+	"scripts": {
+		"build": "rollup --config"
+	}
+}
