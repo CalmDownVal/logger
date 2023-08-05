@@ -1,15 +1,16 @@
 import { LogSeverity, PlainTextLogFormatter, type LogFormatter, type LogMessage, type LogTransport } from '@cdv/logger';
 
-export interface ConsoleTransportOptions<TPayload = unknown> {
+export interface ConsoleLogTransportOptions<TPayload = unknown> {
 	readonly minSeverity?: LogSeverity;
 	readonly formatter?: LogFormatter<string | (readonly string[]), TPayload>;
 }
 
-export class ConsoleTransport<TPayload = unknown> implements LogTransport<TPayload> {
+export class ConsoleLogTransport<TPayload = unknown> implements LogTransport<TPayload> {
 	public minSeverity: LogSeverity;
+
 	private readonly formatter: LogFormatter<string | (readonly string[]), TPayload>;
 
-	public constructor(options: ConsoleTransportOptions<TPayload> = {}) {
+	public constructor(options: ConsoleLogTransportOptions<TPayload> = {}) {
 		this.minSeverity = options.minSeverity ?? LogSeverity.Debug;
 		this.formatter = options.formatter ?? new PlainTextLogFormatter();
 	}

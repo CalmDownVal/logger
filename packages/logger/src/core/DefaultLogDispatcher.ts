@@ -23,7 +23,7 @@ export class DefaultLogDispatcher<TPayload = unknown> implements LogDispatcher<T
 	public dispatch(message: LogMessage<TPayload>) {
 		if (!this.isClosing) {
 			this.transports.forEach(transport => {
-				if (transport.minSeverity <= message.severity) {
+				if (message.severity >= transport.minSeverity) {
 					transport.handle(message);
 				}
 			});

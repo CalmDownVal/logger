@@ -19,7 +19,7 @@ export class ConsoleColorLogFormatter implements LogFormatter<readonly string[],
 	private readonly severities: Record<LogSeverity, ConsoleColorLogFormatterSeverityOptions>;
 	private readonly timeFormatter: TimeFormatter;
 
-	public constructor(options: ConsoleColorLogFormatterOptions) {
+	public constructor(options: ConsoleColorLogFormatterOptions = {}) {
 		this.severities = options.severities ?? ConsoleColorLogFormatter.defaultSeverities;
 		this.timeFormatter = options.timeFormatter ?? IsoTimeFormatter.localTimeZone;
 	}

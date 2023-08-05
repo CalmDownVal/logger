@@ -6,6 +6,7 @@ import { LogSeverity, PlainTextLogFormatter, type LogFormatter, type LogMessage,
 export type WritableData = Buffer | Uint8Array | string;
 
 export interface WritableLogTransportOptions<TPayload = unknown> {
+	readonly closeStream?: boolean;
 	readonly formatter?: LogFormatter<WritableData, TPayload>;
 	readonly minSeverity?: LogSeverity;
 	readonly writable: Writable;
@@ -21,11 +22,14 @@ export interface CreateStdOutOptions<TPayload = unknown> extends Omit<WritableLo
 
 export class WritableLogTransport<TPayload = unknown> implements LogTransport<TPayload> {
 	public minSeverity: LogSeverity;
+
+	private readonly closeStream: boolean;
 	private readonly formatter: LogFormatter<WritableData, TPayload>;
 	private readonly writable: Writable;
 
 	public constructor(options: WritableLogTransportOptions<TPayload>) {
 		this.minSeverity = options.minSeverity ?? LogSeverity.Debug;
+		this.closeStream = options.closeStream ?? (options.writable !== process.stdout && options.writable !== process.stderr);
 		this.formatter = options.formatter ?? new PlainTextLogFormatter();
 		this.writable = options.writable;
 	}
@@ -42,6 +46,10 @@ export class WritableLogTransport<TPayload = unknown> implements LogTransport<TP
 	}
 
 	public close() {
+		if (!this.closeStream) {
+			return Promise.resolve();
+		}
+
 		return new Promise<void>(resolve => {
 			this.writable.end(resolve);
 		});
