@@ -1,7 +1,7 @@
 {
 	"name": "@cdv/logger-monorepo",
 	"private": true,
-	"packageManager": "yarn@3.6.1",
+	"packageManager": "yarn@3.6.3",
 	"workspaces": [
 		"packages/*"
 	],

@@ -83,7 +83,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@cdv/logger-browser@workspace:packages/logger-browser"
   dependencies:
-    "@cdv/logger": 1.0.0
+    "@cdv/logger": "workspace:*"
     "@rollup/plugin-terser": 0.4.3
     "@rollup/plugin-typescript": 11.1.2
     rollup: 3.27.2
@@ -93,7 +93,7 @@ __metadata:
     tslib: 2.6.1
     typescript: 5.1.6
   peerDependencies:
-    "@cdv/logger": ">=1.0.0"
+    "@cdv/logger": 1.0.0-alpha.1
   languageName: unknown
   linkType: soft
 
@@ -115,7 +115,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@cdv/logger-node@workspace:packages/logger-node"
   dependencies:
-    "@cdv/logger": 1.0.0
+    "@cdv/logger": "workspace:*"
     "@rollup/plugin-terser": 0.4.3
     "@rollup/plugin-typescript": 11.1.2
     "@types/node": 20.4.8
@@ -126,11 +126,11 @@ __metadata:
     tslib: 2.6.1
     typescript: 5.1.6
   peerDependencies:
-    "@cdv/logger": ">=1.0.0"
+    "@cdv/logger": 1.0.0-alpha.1
   languageName: unknown
   linkType: soft
 
-"@cdv/logger@1.0.0, @cdv/logger@workspace:packages/logger":
+"@cdv/logger@workspace:*, @cdv/logger@workspace:packages/logger":
   version: 0.0.0-use.local
   resolution: "@cdv/logger@workspace:packages/logger"
   dependencies:

@@ -1,6 +1,6 @@
 {
 	"name": "@cdv/logger-browser",
-	"version": "1.0.0",
+	"version": "1.0.0-alpha.1",
 	"license": "ISC",
 	"exports": {
 		".": {
@@ -10,10 +10,10 @@
 		}
 	},
 	"peerDependencies": {
-		"@cdv/logger": ">=1.0.0"
+		"@cdv/logger": "1.0.0-alpha.1"
 	},
 	"devDependencies": {
-		"@cdv/logger": "1.0.0",
+		"@cdv/logger": "workspace:*",
 		"@rollup/plugin-terser": "0.4.3",
 		"@rollup/plugin-typescript": "11.1.2",
 		"rollup": "3.27.2",
