@@ -1,6 +1,6 @@
 {
 	"name": "@cdv/logger-node",
-	"version": "1.0.0-alpha.2",
+	"version": "1.0.0-alpha.3",
 	"license": "ISC",
 	"exports": {
 		".": {
@@ -10,7 +10,7 @@
 		}
 	},
 	"peerDependencies": {
-		"@cdv/logger": "1.0.0-alpha.2"
+		"@cdv/logger": "1.0.0-alpha.3"
 	},
 	"devDependencies": {
 		"@cdv/logger": "workspace:*",

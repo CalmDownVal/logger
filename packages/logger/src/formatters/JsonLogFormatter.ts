@@ -1,5 +1,4 @@
-import { IsoTimeFormatter } from '~/formatters/IsoTimeFormatter';
-import { LogSeverity, type LogFormatter, type LogMessage, type TimeFormatter } from '~/types';
+import { LogSeverity, type LogFormatter, type LogMessage } from '~/types';
 
 export interface JsonReplacer {
 	(this: any, key: string, value: unknown): unknown;
@@ -12,23 +11,20 @@ export interface JsonLogFormatterSeverityOptions {
 export interface JsonLogFormatterOptions {
 	readonly jsonReplacer?: JsonReplacer;
 	readonly severities?: Record<LogSeverity, JsonLogFormatterSeverityOptions>;
-	readonly timeFormatter?: TimeFormatter;
 }
 
 export class JsonLogFormatter implements LogFormatter {
 	private readonly severities: Record<LogSeverity, JsonLogFormatterSeverityOptions>;
-	private readonly timeFormatter: TimeFormatter;
 	private readonly jsonReplacer?: JsonReplacer;
 
 	public constructor(options: JsonLogFormatterOptions = {}) {
 		this.severities = options.severities ?? JsonLogFormatter.defaultSeverities;
-		this.timeFormatter = options.timeFormatter ?? IsoTimeFormatter.localTimeZone;
 		this.jsonReplacer = options.jsonReplacer;
 	}
 
 	public format(message: LogMessage) {
 		const data = {
-			timestamp: this.timeFormatter.format(message.timestamp),
+			timestamp: new Date(message.timestamp),
 			label: message.label,
 			severity: this.severities[message.severity].name,
 			payload: message.payload
