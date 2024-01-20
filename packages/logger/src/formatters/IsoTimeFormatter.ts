@@ -1,5 +1,5 @@
 import type { TimeFormatter } from '~/types';
-import { intToStringPad2 } from '~/utils/misc';
+import { intToStringPad2 } from '~/utils/internal';
 
 export class IsoTimeFormatter implements TimeFormatter {
 	public constructor(

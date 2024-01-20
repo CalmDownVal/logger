@@ -1,5 +1,5 @@
 import type { LogDispatcher, LogMessage, LogSeverity, Logger, LoggerFactory, TimeProvider } from '~/types';
-import { joinLabels } from '~/utils/misc';
+import { joinLabels } from '~/utils/internal';
 
 import { LoggerBase } from './LoggerBase';
 

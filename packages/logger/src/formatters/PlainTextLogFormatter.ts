@@ -1,5 +1,6 @@
 import { IsoTimeFormatter } from '~/formatters/IsoTimeFormatter';
 import { LogSeverity, type LogFormatter, type LogMessage, type TimeFormatter } from '~/types';
+import { toStringOrJson } from '~/utils/shared';
 
 export interface PlainTextLogFormatterSeverityOptions {
 	readonly name: string;
@@ -22,7 +23,7 @@ export class PlainTextLogFormatter implements LogFormatter<string, any> {
 	public format(message: LogMessage) {
 		const time = this.timeFormatter.format(message.timestamp);
 		const severity = this.severities[message.severity].name;
-		return `[${time}][${severity}][${message.label}]: ${message.payload}`;
+		return `[${time}][${severity}][${message.label}]: ${toStringOrJson(message.payload)}`;
 	}
 
 	public static readonly defaultSeverities: Record<LogSeverity, PlainTextLogFormatterSeverityOptions> = {

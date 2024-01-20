@@ -1,4 +1,4 @@
-import { IsoTimeFormatter, LogSeverity, type LogFormatter, type LogMessage, type TimeFormatter } from '@cdv/logger';
+import { IsoTimeFormatter, LogSeverity, toStringOrJson, type LogFormatter, type LogMessage, type TimeFormatter } from '@cdv/logger';
 
 import { Ansi16, type AnsiColorSystem, type RgbColor } from '~/utils/AnsiColorSystem';
 
@@ -36,10 +36,10 @@ export class AnsiColorLogFormatter implements LogFormatter<string, any> {
 		const header = `[${time}][${severity.name}][${message.label}]: `;
 		switch (severity.extent) {
 			case ColorExtent.HeaderOnly:
-				return `${this.colorSystem.text(severity.color)}${header}${this.colorSystem.reset}${message.payload}`;
+				return `${this.colorSystem.text(severity.color)}${header}${this.colorSystem.reset}${toStringOrJson(message.payload)}`;
 
 			case ColorExtent.EntireLine:
-				return `${this.colorSystem.text(severity.color)}${header}${message.payload}${this.colorSystem.reset}`;
+				return `${this.colorSystem.text(severity.color)}${header}${toStringOrJson(message.payload)}${this.colorSystem.reset}`;
 		}
 	}
 

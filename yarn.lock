@@ -93,7 +93,7 @@ __metadata:
     tslib: 2.6.1
     typescript: 5.1.6
   peerDependencies:
-    "@cdv/logger": 1.0.0-alpha.1
+    "@cdv/logger": 1.0.0-alpha.2
   languageName: unknown
   linkType: soft
 
@@ -126,7 +126,7 @@ __metadata:
     tslib: 2.6.1
     typescript: 5.1.6
   peerDependencies:
-    "@cdv/logger": 1.0.0-alpha.1
+    "@cdv/logger": 1.0.0-alpha.2
   languageName: unknown
   linkType: soft
 

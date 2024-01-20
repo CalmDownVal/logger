@@ -62,7 +62,7 @@ export class WritableLogTransport<TPayload = unknown> implements LogTransport<TP
 		});
 	}
 
-	public static createStdout<TPayload = unknown>(options: CreateStdOutOptions<TPayload>) {
+	public static createStdOut<TPayload = unknown>(options: CreateStdOutOptions<TPayload>) {
 		return new WritableLogTransport({
 			...options,
 			writable: process.stdout

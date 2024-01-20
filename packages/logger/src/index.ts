@@ -6,4 +6,5 @@ export * from './formatters/IsoDateTimeFormatter';
 export * from './formatters/IsoTimeFormatter';
 export * from './formatters/JsonLogFormatter';
 export * from './formatters/PlainTextLogFormatter';
+export * from './utils/shared';
 export * from './types';

@@ -1,4 +1,4 @@
-import { IsoTimeFormatter, LogSeverity, type LogFormatter, type LogMessage, type TimeFormatter } from '@cdv/logger';
+import { IsoTimeFormatter, LogSeverity, toStringOrJson, type LogFormatter, type LogMessage, type TimeFormatter } from '@cdv/logger';
 
 export enum StyleExtent {
 	HeaderOnly,
@@ -33,10 +33,10 @@ export class ConsoleColorLogFormatter implements LogFormatter<readonly string[],
 		const header = `[${time}][${message.label}]: `;
 		switch (severity.extent) {
 			case StyleExtent.HeaderOnly:
-				return [ `%c${header}%c${message.payload}`, severity.style, '' ];
+				return [ `%c${header}%c${toStringOrJson(message.payload)}`, severity.style, '' ];
 
 			case StyleExtent.EntireLine:
-				return [ `%c${header}${message.payload}`, severity.style ];
+				return [ `%c${header}${toStringOrJson(message.payload)}`, severity.style ];
 		}
 	}
 
