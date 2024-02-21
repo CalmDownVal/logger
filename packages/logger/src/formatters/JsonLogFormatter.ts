@@ -1,7 +1,6 @@
-import type { LogSeverity } from '~/LogSeverity';
 import type { LogFormatter } from '~/types';
 
-import { defaultMapSeverity } from './internal/defaultMapSeverity';
+import { defaultStringifySeverity } from './internal/defaultStringifySeverity';
 
 export interface JsonReplacer {
 	(this: any, key: string, value: any): any;
@@ -9,20 +8,24 @@ export interface JsonReplacer {
 
 export interface JsonLogFormatterOptions {
 	readonly onReplaceJson?: JsonReplacer;
-	readonly onMapSeverity?: (severity: LogSeverity) => any;
+	readonly onTransformSeverity?: (severity: number) => any;
 }
 
+/**
+ * Creates a LogFormatter that stringifies every LogMessage into a JSON string. Suitable for logging
+ * into `.jsonl` files.
+ */
 export function createJsonLogFormatter(options: JsonLogFormatterOptions = {}): LogFormatter<any, string> {
 	const {
 		onReplaceJson,
-		onMapSeverity = defaultMapSeverity
+		onTransformSeverity = defaultStringifySeverity
 	} = options;
 
 	return message => JSON.stringify(
 		{
 			timestamp: new Date(message.timestamp),
 			label: message.label,
-			severity: onMapSeverity(message.severity),
+			severity: onTransformSeverity(message.severity),
 			payload: message.payload
 		},
 		onReplaceJson

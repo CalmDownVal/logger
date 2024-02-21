@@ -8,6 +8,7 @@ const KNOWN_SEVERITIES: Record<number, string | undefined> = {
 	[LogSeverity.Error]: 'ERROR'
 };
 
-export function defaultMapSeverity(severity: LogSeverity) {
+/** @internal */
+export function defaultStringifySeverity(severity: number) {
 	return KNOWN_SEVERITIES[severity] ?? `UNKNOWN:${severity}`;
 }

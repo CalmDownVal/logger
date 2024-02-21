@@ -19,6 +19,9 @@ declare namespace globalThis {
 	const console: ConsoleLike;
 }
 
+/**
+ * Creates a LogTransport that logs incoming LogMessages using the native console.
+ */
 export function createConsoleLogTransport<TPayload>(options: ConsoleLogTransportOptions<TPayload> = {}) {
 	const { console: out = globalThis.console } = options;
 	const callbackMap: Record<number, ((...args: string[]) => void) | undefined> = {

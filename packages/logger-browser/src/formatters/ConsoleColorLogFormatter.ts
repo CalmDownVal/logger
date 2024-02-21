@@ -16,6 +16,10 @@ export interface ConsoleColorLogFormatterOptions<TPayload> {
 	readonly timeFormatter?: TimeFormatter;
 }
 
+/**
+ * Creates a LogFormatter with support for CSS-styled log messages. Suitable for use with the
+ * ConsoleLogTransport.
+ */
 export function createConsoleColorLogFormatter<TPayload>(
 	options: ConsoleColorLogFormatterOptions<TPayload> = {}
 ): LogFormatter<TPayload, string[]> {

@@ -6,6 +6,9 @@ export interface LogDispatcherOptions {
 	readonly timeProvider: TimeProvider;
 }
 
+/**
+ * Creates a LogDispatcher.
+ */
 export function createLogDispatcher<TPayload>(options: LogDispatcherOptions) {
 	const transports = new Set<LogTransport<TPayload, any>>();
 	let isClosing = false;
@@ -20,10 +23,10 @@ export function createLogDispatcher<TPayload>(options: LogDispatcherOptions) {
 				return transports.size > prevSize;
 			}
 		},
-		getLogger: label => createLogger({
-			dispatcher,
-			timeProvider: options.timeProvider,
-			label
+		getLogger: $label => createLogger({
+			$dispatcher: dispatcher,
+			$label,
+			$timeProvider: options.timeProvider
 		}),
 		close: async () => {
 			isClosing = true;

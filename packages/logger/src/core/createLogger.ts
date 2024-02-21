@@ -15,25 +15,26 @@ const PAYLOAD_PROPERTY: PropertyDescriptor = {
 	}
 };
 
+/** @internal */
 export interface LoggerOptions<TPayload> {
-	readonly dispatcher: LogDispatcher<TPayload>;
-	readonly timeProvider: TimeProvider;
-	readonly label: string;
-
+	readonly $dispatcher: LogDispatcher<TPayload>;
+	readonly $label: string;
+	readonly $timeProvider: TimeProvider;
 }
 
+/** @internal */
 export function createLogger<TPayload>(options: LoggerOptions<TPayload>): Logger<TPayload> {
 	const {
-		dispatcher,
-		timeProvider,
-		label
+		$dispatcher,
+		$label,
+		$timeProvider
 	} = options;
 
 	const log: RawLogCallback<TPayload> = (severity, payload) => {
 		const message = {
 			severity,
-			label,
-			timestamp: timeProvider.now()
+			label: $label,
+			timestamp: $timeProvider.now()
 		} as InternalLogMessage<TPayload>;
 
 		if (typeof payload === 'function') {
@@ -44,15 +45,15 @@ export function createLogger<TPayload>(options: LoggerOptions<TPayload>): Logger
 		}
 
 		Object.defineProperty(message, 'payload', PAYLOAD_PROPERTY);
-		dispatcher.$dispatch(message);
+		$dispatcher.$dispatch(message);
 	};
 
 	return {
-		label,
+		label: $label,
 		getLogger: subLabel => createLogger({
-			dispatcher,
-			timeProvider,
-			label: joinLabels(label, subLabel)
+			$dispatcher,
+			$timeProvider,
+			$label: joinLabels($label, subLabel)
 		}),
 		log,
 		trace: payload => log(LogSeverity.Trace, payload),

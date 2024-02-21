@@ -28,6 +28,10 @@ export interface DateTimeFormatterOptions {
 	readonly timeZoneOffsetMinutes?: number;
 }
 
+/**
+ * Creates a TimeFormatter capable of formatting Unix epoch millisecond timestamps into any
+ * string-representations of date, time, timezone etc.
+ */
 export function createDateTimeFormatter(options: DateTimeFormatterOptions = {}): TimeFormatter {
 	const {
 		parts = [ DateTimePart.u ],

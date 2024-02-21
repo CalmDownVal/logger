@@ -20,6 +20,9 @@ export interface AnsiColorLogFormatterOptions<TPayload> {
 	readonly timeFormatter?: TimeFormatter;
 }
 
+/**
+ * Creates a LogFormatter with ANSI color support.
+ */
 export function createAnsiColorLogFormatter<TPayload>(
 	options: AnsiColorLogFormatterOptions<TPayload> = {}
 ): LogFormatter<TPayload, string> {

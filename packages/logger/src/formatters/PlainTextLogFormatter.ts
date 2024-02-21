@@ -1,24 +1,26 @@
 import { createDateTimeFormatter } from '~/formatters/DateTimeFormatter';
-import type { LogSeverity } from '~/LogSeverity';
 import type { LogFormatter, TimeFormatter } from '~/types';
 import { toStringOrJson } from '~/utils';
 
-import { defaultMapSeverity } from './internal/defaultMapSeverity';
+import { defaultStringifySeverity } from './internal/defaultStringifySeverity';
 
 export interface PlainTextLogFormatterOptions<TPayload> {
-	readonly onMapSeverity?: (severity: LogSeverity) => string;
 	readonly onStringifyPayload?: (payload: TPayload) => string;
+	readonly onStringifySeverity?: (severity: number) => string;
 	readonly timeFormatter?: TimeFormatter;
 }
 
+/**
+ * Creates a LogFormatter that converts every LogMessage into a string.
+ */
 export function createPlainTextLogFormatter<TPayload>(
 	options: PlainTextLogFormatterOptions<TPayload> = {}
 ): LogFormatter<TPayload, string> {
 	const {
-		onMapSeverity = defaultMapSeverity,
 		onStringifyPayload = toStringOrJson,
+		onStringifySeverity = defaultStringifySeverity,
 		timeFormatter = createDateTimeFormatter()
 	} = options;
 
-	return message => `[${timeFormatter(message.timestamp)}][${onMapSeverity(message.severity)}][${message.label}]: ${onStringifyPayload(message.payload)}`;
+	return message => `[${timeFormatter(message.timestamp)}][${onStringifySeverity(message.severity)}][${message.label}]: ${onStringifyPayload(message.payload)}`;
 }

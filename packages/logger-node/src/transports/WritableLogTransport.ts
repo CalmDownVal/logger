@@ -12,6 +12,9 @@ export interface WritableLogTransportOptions<TPayload> {
 	readonly writable: Writable;
 }
 
+/**
+ * Creates a LogTransport that outputs into an arbitrary Writable stream.
+ */
 export function createWritableLogTransport<TPayload>(
 	options: WritableLogTransportOptions<TPayload>
 ) {
@@ -45,6 +48,9 @@ export interface FileLogTransportOptions<TPayload> extends Omit<WritableLogTrans
 	readonly path: PathLike;
 }
 
+/**
+ * Creates a LogTransport that outputs into a file.
+ */
 export function createFileLogTransport<TPayload>(options: FileLogTransportOptions<TPayload>) {
 	return createWritableLogTransport({
 		...options,
@@ -54,6 +60,9 @@ export function createFileLogTransport<TPayload>(options: FileLogTransportOption
 
 export interface StdOutLogTransportOptions<TPayload> extends Omit<WritableLogTransportOptions<TPayload>, 'writable'> {}
 
+/**
+ * Creates a LogTransport that outputs into the process.stdout stream.
+ */
 export function createStdOutLogTransport<TPayload>(options: StdOutLogTransportOptions<TPayload>) {
 	return createWritableLogTransport({
 		...options,

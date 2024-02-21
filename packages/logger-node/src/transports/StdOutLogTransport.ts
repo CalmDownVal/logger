@@ -3,12 +3,27 @@ import { createPlainTextLogFormatter, LogSeverity, type LogFormatter, type LogTr
 export interface DockRow {
 	/** @internal */
 	$isDirty: boolean;
+
+	/**
+	 * Gets or sets the text of this DockRow.
+	 */
 	text: string;
 }
 
 export interface Dock extends Iterable<DockRow> {
+	/**
+	 * Adds a new DockRow to this Dock, optionally with an initial text.
+	 */
 	add(initialText?: string): DockRow;
+
+	/**
+	 * Removes the provided DockRow from this Dock.
+	 */
 	remove(row: DockRow): void;
+
+	/**
+	 * Removes all DockRows from this Dock.
+	 */
 	removeAll(): void;
 }
 
@@ -23,6 +38,11 @@ export interface StdOutWithDockLogTransportOptions<TPayload> {
 	readonly trimMargin?: number;
 }
 
+/**
+ * Creates a StdOutWithDockLogTransport. This transport outputs into the process stdout and provides
+ * an interface to keep 'sticky' docked rows at the bottom of the output at all times. These rows
+ * can dynamically change their text throughout runtime.
+ */
 export function createStdOutWithDockLogTransport<TPayload>(
 	options: StdOutWithDockLogTransportOptions<TPayload>
 ) {
@@ -112,13 +132,12 @@ export function createStdOutWithDockLogTransport<TPayload>(
 			remove: row => {
 				const index = rows.indexOf(row);
 				if (index === -1) {
-					return false;
+					return;
 				}
 
 				rows.splice(index, 1);
 				dirtyIndex = Math.min(dirtyIndex, index);
 				scheduleUpdate();
-				return true;
 			},
 			removeAll: () => {
 				if (rows.length > 0) {

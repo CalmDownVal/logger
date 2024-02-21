@@ -52,16 +52,27 @@ function createSystem(back: (color: RgbColor) => string, text: (color: RgbColor)
 
 export type AnsiColorSystem = ReturnType<typeof createSystem>;
 
+/**
+ * The ANSI 16 color system. Supported by nearly all terminals, but only provides the most basic 16
+ * colors.
+ */
 export const Ansi16 = createSystem(
 	color => `\u001b[${toAnsi16(color) + 10}m`,
 	color => `\u001b[${toAnsi16(color)}m`
 );
 
+/**
+ * The ANSI 256 color system. Supported by most terminals. Provides 256 basic colors.
+ */
 export const Ansi256 = createSystem(
 	color => `\u001b[48;5;${toAnsi256(color)}m`,
 	color => `\u001b[38;5;${toAnsi256(color)}m`
 );
 
+/**
+ * The ANSI 16M color system. Only supported by modern terminals, but provides the full RGB spectrum
+ * of colors (8 bits per channel).
+ */
 export const Ansi16m = createSystem(
 	color => `\u001b[48;2;${toAnsi16m(color)}m`,
 	color => `\u001b[38;2;${toAnsi16m(color)}m`
