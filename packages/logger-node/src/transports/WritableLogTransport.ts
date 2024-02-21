@@ -1,71 +1,62 @@
 import { createWriteStream, type PathLike } from 'node:fs';
 import type { Writable } from 'node:stream';
 
-import { LogSeverity, PlainTextLogFormatter, type LogFormatter, type LogMessage, type LogTransport } from '@cdv/logger';
+import { createPlainTextLogFormatter, LogSeverity, type LogFormatter, type LogTransport } from '@cdv/logger';
 
 export type WritableData = Buffer | Uint8Array | string;
 
-export interface WritableLogTransportOptions<TPayload = unknown> {
+export interface WritableLogTransportOptions<TPayload> {
 	readonly closeStream?: boolean;
-	readonly formatter?: LogFormatter<WritableData, TPayload>;
+	readonly formatter?: LogFormatter<TPayload, WritableData>;
 	readonly minSeverity?: LogSeverity;
 	readonly writable: Writable;
 }
 
-export interface CreateFileOptions<TPayload = unknown> extends Omit<WritableLogTransportOptions<TPayload>, 'writable'> {
+export function createWritableLogTransport<TPayload>(
+	options: WritableLogTransportOptions<TPayload>
+) {
+	const {
+		closeStream = true,
+		writable
+	} = options;
+
+	const transport: LogTransport<TPayload, WritableData> = {
+		formatter: options.formatter ?? createPlainTextLogFormatter(),
+		minSeverity: options.minSeverity ?? LogSeverity.Info,
+		close: () => closeStream
+			? new Promise<void>(resolve => {
+				writable.end(resolve);
+			})
+			: Promise.resolve(),
+		handle: message => {
+			if (!writable.errored) {
+				// We ignore the return value of write, because buffering and overflow handling is
+				// already implemented in Node's streams
+				writable.write(transport.formatter(message));
+				writable.write('\n');
+			}
+		}
+	};
+
+	return transport;
+}
+
+export interface FileLogTransportOptions<TPayload> extends Omit<WritableLogTransportOptions<TPayload>, 'writable'> {
 	readonly path: PathLike;
 }
 
-export interface CreateStdOutOptions<TPayload = unknown> extends Omit<WritableLogTransportOptions<TPayload>, 'writable'> {
-	readonly minSeverity: LogSeverity;
+export function createFileLogTransport<TPayload>(options: FileLogTransportOptions<TPayload>) {
+	return createWritableLogTransport({
+		...options,
+		writable: createWriteStream(options.path)
+	});
 }
 
-export class WritableLogTransport<TPayload = unknown> implements LogTransport<TPayload> {
-	public minSeverity: LogSeverity;
+export interface StdOutLogTransportOptions<TPayload> extends Omit<WritableLogTransportOptions<TPayload>, 'writable'> {}
 
-	private readonly closeStream: boolean;
-	private readonly formatter: LogFormatter<WritableData, TPayload>;
-	private readonly writable: Writable;
-
-	public constructor(options: WritableLogTransportOptions<TPayload>) {
-		this.minSeverity = options.minSeverity ?? LogSeverity.Debug;
-		this.closeStream = options.closeStream ?? (options.writable !== process.stdout && options.writable !== process.stderr);
-		this.formatter = options.formatter ?? new PlainTextLogFormatter();
-		this.writable = options.writable;
-	}
-
-	public handle(message: LogMessage<TPayload>) {
-		if (!this.writable.errored) {
-			const log = this.formatter.format(message);
-
-			// We ignore the return value of write, because buffering and overflow
-			// handling is already implemented in Node's streams
-			this.writable.write(log);
-			this.writable.write('\n');
-		}
-	}
-
-	public close() {
-		if (!this.closeStream) {
-			return Promise.resolve();
-		}
-
-		return new Promise<void>(resolve => {
-			this.writable.end(resolve);
-		});
-	}
-
-	public static createFile<TPayload = unknown>(options: CreateFileOptions<TPayload>) {
-		return new WritableLogTransport({
-			...options,
-			writable: createWriteStream(options.path)
-		});
-	}
-
-	public static createStdOut<TPayload = unknown>(options: CreateStdOutOptions<TPayload>) {
-		return new WritableLogTransport({
-			...options,
-			writable: process.stdout
-		});
-	}
+export function createStdOutLogTransport<TPayload>(options: StdOutLogTransportOptions<TPayload>) {
+	return createWritableLogTransport({
+		...options,
+		writable: process.stdout
+	});
 }

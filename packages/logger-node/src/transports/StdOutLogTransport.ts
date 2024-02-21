@@ -1,149 +1,149 @@
-import { LogSeverity, PlainTextLogFormatter, type LogFormatter, type LogMessage, type LogTransport } from '@cdv/logger';
+import { createPlainTextLogFormatter, LogSeverity, type LogFormatter, type LogTransport } from '@cdv/logger';
 
-export interface StdOutLogTransportOptions<TPayload = unknown> {
+export interface DockRow {
+	/** @internal */
+	$isDirty: boolean;
+	text: string;
+}
+
+export interface Dock extends Iterable<DockRow> {
+	add(initialText?: string): DockRow;
+	remove(row: DockRow): void;
+	removeAll(): void;
+}
+
+export interface StdOutWithDockLogTransport<TPayload> extends LogTransport<TPayload, string> {
+	readonly dock: Dock;
+}
+
+export interface StdOutWithDockLogTransportOptions<TPayload> {
 	readonly dockGap?: number;
-	readonly formatter?: LogFormatter<string, TPayload>;
+	readonly formatter?: LogFormatter<TPayload, string>;
 	readonly minSeverity?: LogSeverity;
 	readonly trimMargin?: number;
 }
 
-export interface DockedRow {
-	/** @internal */
-	isDirty: boolean;
-	content: string;
-}
+export function createStdOutWithDockLogTransport<TPayload>(
+	options: StdOutWithDockLogTransportOptions<TPayload>
+) {
+	const dockGap = Math.max(options.dockGap ?? 1, 0);
+	const trimMargin = Math.max(options.trimMargin ?? 5, 0);
+	const rows: DockRow[] = [];
 
-export class StdOutLogTransport<TPayload = unknown> implements LogTransport<TPayload> {
-	public minSeverity: LogSeverity;
+	let cursor = -dockGap;
+	let dirtyIndex = 0;
+	let isPendingUpdate = false;
+	let lineBuffer = '';
 
-	private readonly formatter: LogFormatter<string, TPayload>;
-	private readonly rows: DockedRow[] = [];
-	private readonly dockGap: number;
-	private readonly trimMargin: number;
-	private cursor: number;
-	private dirtyIndex = 0;
-	private isPendingUpdate = false;
-	private lineBuffer = '';
-
-	public constructor(options: StdOutLogTransportOptions = {}) {
-		this.minSeverity = options.minSeverity ?? LogSeverity.Debug;
-		this.formatter = options.formatter ?? new PlainTextLogFormatter();
-		this.dockGap = Math.max(options.dockGap ?? 1, 0);
-		this.trimMargin = Math.max(options.trimMargin ?? 5, 0);
-		this.cursor = -this.dockGap;
-
-		process.on('SIGWINCH', this.onResize);
-	}
-
-	public handle(message: LogMessage<TPayload>): void {
-		const log = this.formatter.format(message) + '\n';
-		if (!this.isPendingUpdate && this.rows.length === 0) {
-			process.stdout.write(log);
-		}
-		else {
-			this.lineBuffer += log;
-			this.scheduleUpdate();
-		}
-	}
-
-	public close() {
-		process.off('SIGWINCH', this.onResize);
-	}
-
-
-	public get dockedRows(): readonly DockedRow[] {
-		return this.rows;
-	}
-
-	public addDockedRow(initialContent = ''): DockedRow {
-		let content = initialContent;
-
-		const { scheduleUpdate } = this;
-		const row: DockedRow = {
-			isDirty: true,
-			get content() {
-				return content;
-			},
-			set content(value) {
-				if (content !== (content = sanitizeContent(value))) {
-					this.isDirty = true;
-					scheduleUpdate();
-				}
-			}
-		};
-
-		this.rows.push(row);
-		this.scheduleUpdate();
-		return row;
-	}
-
-	public removeDockedRow(row: DockedRow) {
-		const index = this.rows.indexOf(row);
-		if (index === -1) {
-			return false;
-		}
-
-		this.rows.splice(index, 1);
-		this.dirtyIndex = Math.min(this.dirtyIndex, index);
-		this.scheduleUpdate();
-		return true;
-	}
-
-	public clearDockedRows() {
-		if (this.rows.length !== 0) {
-			this.rows.splice(0, this.rows.length);
-			this.dirtyIndex = 0;
-			this.scheduleUpdate();
-		}
-	}
-
-	private readonly scheduleUpdate = () => {
-		if (!this.isPendingUpdate) {
-			this.isPendingUpdate = true;
-			process.nextTick(this.onUpdate);
-		}
-	};
-
-	private readonly onResize = () => {
-		this.dirtyIndex = 0;
-		this.scheduleUpdate();
-	};
-
-	private readonly onUpdate = () => {
-		const rowCount = this.rows.length;
-		const maxLength = process.stdout.columns - this.trimMargin;
+	const onUpdate = () => {
+		const rowCount = rows.length;
+		const maxLength = process.stdout.columns - trimMargin;
 
 		let cmd = '';
 		let clearDown = '\u001b[0J';
 		let clearLine = '\u001b[2K';
 
-		if (this.lineBuffer.length > 0) {
-			cmd += cursorMove(-this.cursor - this.dockGap) + '\r' + clearDown + this.lineBuffer;
-			this.lineBuffer = '';
-			this.dirtyIndex = 0;
+		if (lineBuffer.length > 0) {
+			cmd += cursorMove(-cursor - dockGap) + '\r' + clearDown + lineBuffer;
+			lineBuffer = '';
+			dirtyIndex = 0;
 
-			this.cursor = -this.dockGap;
+			cursor = -dockGap;
 			clearDown = '';
 			clearLine = '';
 		}
 
 		for (let i = 0; i < rowCount; ++i) {
-			const row = this.rows[i];
-			if (row.isDirty || i >= this.dirtyIndex) {
-				cmd += cursorMove(i - this.cursor) + '\r' + clearLine + trimContent(row.content, maxLength) + '\n';
-				row.isDirty = false;
+			const row = rows[i];
+			if (row.$isDirty || i >= dirtyIndex) {
+				cmd += cursorMove(i - cursor) + '\r' + clearLine + trimContent(row.text, maxLength) + '\n';
+				row.$isDirty = false;
 
-				this.cursor = i + 1;
+				cursor = i + 1;
 			}
 		}
 
-		cmd += cursorMove(rowCount - this.cursor) + clearDown;
+		cmd += cursorMove(rowCount - cursor) + clearDown;
 		process.stdout.write(cmd, 'utf8');
 
-		this.cursor = rowCount;
-		this.dirtyIndex = rowCount;
-		this.isPendingUpdate = false;
+		cursor = rowCount;
+		dirtyIndex = rowCount;
+		isPendingUpdate = false;
 	};
+
+	const scheduleUpdate = () => {
+		if (!isPendingUpdate) {
+			isPendingUpdate = true;
+			process.nextTick(onUpdate);
+		}
+	};
+
+	const onResize = () => {
+		dirtyIndex = 0;
+		scheduleUpdate();
+	};
+
+	process.on('SIGWINCH', onResize);
+
+	const transport: StdOutWithDockLogTransport<TPayload> = {
+		formatter: options.formatter ?? createPlainTextLogFormatter(),
+		minSeverity: options.minSeverity ?? LogSeverity.Info,
+		dock: {
+			[Symbol.iterator]: () => rows[Symbol.iterator](),
+			add: (initialText = '') => {
+				let text = initialText;
+				const row: DockRow = {
+					$isDirty: true,
+					get text() {
+						return text;
+					},
+					set text(newText) {
+						if (text !== (text = sanitizeContent(newText))) {
+							row.$isDirty = true;
+							scheduleUpdate();
+						}
+					}
+				};
+
+				rows.push(row);
+				scheduleUpdate();
+				return row;
+			},
+			remove: row => {
+				const index = rows.indexOf(row);
+				if (index === -1) {
+					return false;
+				}
+
+				rows.splice(index, 1);
+				dirtyIndex = Math.min(dirtyIndex, index);
+				scheduleUpdate();
+				return true;
+			},
+			removeAll: () => {
+				if (rows.length > 0) {
+					rows.length = 0;
+					dirtyIndex = 0;
+					scheduleUpdate();
+				}
+			}
+		},
+		close: () => {
+			process.off('SIGWINCH', onResize);
+		},
+		handle: message => {
+			const log = transport.formatter(message) + '\n';
+			if (!isPendingUpdate && rows.length === 0) {
+				process.stdout.write(log);
+			}
+			else {
+				lineBuffer += log;
+				scheduleUpdate();
+			}
+		}
+	};
+
+	return transport;
 }
 
 function cursorMove(offset: number) {

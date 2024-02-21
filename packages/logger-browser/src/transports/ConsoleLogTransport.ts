@@ -1,52 +1,44 @@
-import { LogSeverity, PlainTextLogFormatter, type LogFormatter, type LogMessage, type LogTransport } from '@cdv/logger';
+import { createPlainTextLogFormatter, LogSeverity, noop, type LogFormatter, type LogTransport } from '@cdv/logger';
 
-export interface ConsoleLogTransportOptions<TPayload = unknown> {
-	readonly minSeverity?: LogSeverity;
-	readonly formatter?: LogFormatter<string | (readonly string[]), TPayload>;
+export interface ConsoleLike {
+	log(...args: string[]): void;
+	trace(...args: string[]): void;
+	debug(...args: string[]): void;
+	info(...args: string[]): void;
+	warn(...args: string[]): void;
+	error(...args: string[]): void;
 }
 
-export class ConsoleLogTransport<TPayload = unknown> implements LogTransport<TPayload> {
-	public minSeverity: LogSeverity;
+export interface ConsoleLogTransportOptions<TPayload> {
+	readonly console?: ConsoleLike;
+	readonly minSeverity?: LogSeverity;
+	readonly formatter?: LogFormatter<TPayload, string | (readonly string[])>;
+}
 
-	private readonly formatter: LogFormatter<string | (readonly string[]), TPayload>;
+declare namespace globalThis {
+	const console: ConsoleLike;
+}
 
-	public constructor(options: ConsoleLogTransportOptions<TPayload> = {}) {
-		this.minSeverity = options.minSeverity ?? LogSeverity.Debug;
-		this.formatter = options.formatter ?? new PlainTextLogFormatter();
-	}
+export function createConsoleLogTransport<TPayload>(options: ConsoleLogTransportOptions<TPayload> = {}) {
+	const { console: out = globalThis.console } = options;
+	const callbackMap: Record<number, ((...args: string[]) => void) | undefined> = {
+		[LogSeverity.Trace]: out.trace,
+		[LogSeverity.Debug]: out.debug,
+		[LogSeverity.Info]: out.info,
+		[LogSeverity.Warn]: out.warn,
+		[LogSeverity.Error]: out.error
+	};
 
-	public handle(message: LogMessage<TPayload>) {
-		let log = this.formatter.format(message);
-		if (!Array.isArray(log)) {
-			log = [ log as string ];
+	const transport: LogTransport<TPayload, string | (readonly string[])> = {
+		formatter: options.formatter ?? createPlainTextLogFormatter(),
+		minSeverity: options.minSeverity ?? LogSeverity.Info,
+		close: noop,
+		handle: message => {
+			const callback = callbackMap[message.severity] ?? out.log;
+			const args = transport.formatter(message);
+			callback.apply(out, Array.isArray(args) ? args : [ args ]);
 		}
+	};
 
-		/* eslint-disable no-console */
-		switch (message.severity) {
-			case LogSeverity.Trace:
-				console.trace(...log);
-				break;
-
-			case LogSeverity.Debug:
-				console.debug(...log);
-				break;
-
-			case LogSeverity.Info:
-				console.info(...log);
-				break;
-
-			case LogSeverity.Warn:
-				console.warn(...log);
-				break;
-
-			case LogSeverity.Error:
-				console.error(...log);
-				break;
-		}
-		/* eslint-enable */
-	}
-
-	public close() {
-		// no-op
-	}
+	return transport;
 }

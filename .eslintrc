@@ -9,6 +9,9 @@
 	"parserOptions": {
 		"project": "./packages/*/tsconfig.json"
 	},
+	"rules": {
+		"object-shorthand": "off"
+	},
 	"settings": {
 		"import/resolver": {
 			"@calmdownval/eslint-import-resolver": {

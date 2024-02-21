@@ -3,7 +3,6 @@
 		"baseUrl": "./src",
 		"isolatedModules": true,
 		"lib": [
-			"DOM",
 			"ESNext"
 		],
 		"module": "ESNext",

@@ -1,43 +1,30 @@
-import { LogSeverity, type LogFormatter, type LogMessage } from '~/types';
+import type { LogSeverity } from '~/LogSeverity';
+import type { LogFormatter } from '~/types';
+
+import { defaultMapSeverity } from './internal/defaultMapSeverity';
 
 export interface JsonReplacer {
-	(this: any, key: string, value: unknown): unknown;
-}
-
-export interface JsonLogFormatterSeverityOptions {
-	readonly name: string;
+	(this: any, key: string, value: any): any;
 }
 
 export interface JsonLogFormatterOptions {
-	readonly jsonReplacer?: JsonReplacer;
-	readonly severities?: Record<LogSeverity, JsonLogFormatterSeverityOptions>;
+	readonly onReplaceJson?: JsonReplacer;
+	readonly onMapSeverity?: (severity: LogSeverity) => any;
 }
 
-export class JsonLogFormatter implements LogFormatter {
-	private readonly severities: Record<LogSeverity, JsonLogFormatterSeverityOptions>;
-	private readonly jsonReplacer?: JsonReplacer;
+export function createJsonLogFormatter(options: JsonLogFormatterOptions = {}): LogFormatter<any, string> {
+	const {
+		onReplaceJson,
+		onMapSeverity = defaultMapSeverity
+	} = options;
 
-	public constructor(options: JsonLogFormatterOptions = {}) {
-		this.severities = options.severities ?? JsonLogFormatter.defaultSeverities;
-		this.jsonReplacer = options.jsonReplacer;
-	}
-
-	public format(message: LogMessage) {
-		const data = {
+	return message => JSON.stringify(
+		{
 			timestamp: new Date(message.timestamp),
 			label: message.label,
-			severity: this.severities[message.severity].name,
+			severity: onMapSeverity(message.severity),
 			payload: message.payload
-		};
-
-		return JSON.stringify(data, this.jsonReplacer);
-	}
-
-	public static readonly defaultSeverities: Record<LogSeverity, JsonLogFormatterSeverityOptions> = {
-		[LogSeverity.Trace]: { name: 'TRACE' },
-		[LogSeverity.Debug]: { name: 'DEBUG' },
-		[LogSeverity.Info]: { name: 'INFO' },
-		[LogSeverity.Warn]: { name: 'WARN' },
-		[LogSeverity.Error]: { name: 'ERROR' }
-	};
+		},
+		onReplaceJson
+	);
 }

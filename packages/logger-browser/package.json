@@ -1,6 +1,6 @@
 {
 	"name": "@cdv/logger-browser",
-	"version": "1.0.0-alpha.3",
+	"version": "1.0.0-alpha.4",
 	"license": "ISC",
 	"exports": {
 		".": {
@@ -10,7 +10,7 @@
 		}
 	},
 	"peerDependencies": {
-		"@cdv/logger": "1.0.0-alpha.3"
+		"@cdv/logger": "1.0.0-alpha.4"
 	},
 	"devDependencies": {
 		"@cdv/logger": "workspace:*",
